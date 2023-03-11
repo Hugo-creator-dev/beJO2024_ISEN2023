@@ -34,7 +34,7 @@ app.config.update({
 oidc = OpenIDConnect(app)
 
 def select(Table,Athlete_sub):
-    Athlete_ID = hash(Athlete_sub)
+    Athlete_ID = Athlete_sub
     conn = sqlite3.connect('../storage/database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM "+Table+" WHERE Athlete_ID = ?",(Athlete_ID,))
@@ -49,7 +49,7 @@ def format_return(code=0,message='',data=None):
 @app.route('/identity', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def identity():
-    Athlete_ID = hash(g.oidc_token_info['sub'])
+    Athlete_ID = g.oidc_token_info['sub']
 
     Sport = request.json['Sport']
     Birth_Date = request.json['Birth_Date']
@@ -71,10 +71,10 @@ def identity():
 def get_identity():
     return format_return(data=select("Identity",g.oidc_token_info['sub']))
 
-@app.route('/sport', methods=['POST'])
+""" @app.route('/sport', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def sport():
-    Athlete_ID = hash(g.oidc_token_info['sub'])
+    Athlete_ID = g.oidc_token_info['sub']
 
     Date_of_last_competition = request.json['Date_of_last_competition']
     Date_of_last_training = request.json['Date_of_last_training']
@@ -96,7 +96,7 @@ def sport():
 @app.route('/sport', methods=['GET'])
 @oidc.accept_token(require_token=True)
 def get_sport():
-    return format_return(data=select("Sport",g.oidc_token_info['sub']))
+    return format_return(data=select("Sport",g.oidc_token_info['sub'])) """
 
 
 
@@ -104,7 +104,7 @@ def get_sport():
 @app.route('/injuries', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def injuries():
-    Athlete_ID = hash(g.oidc_token_info['sub'])
+    Athlete_ID = g.oidc_token_info['sub']
 
     Date = request.json['Date']
     Position = request.json['Position']
@@ -128,7 +128,7 @@ def get_injuries():
 @app.route('/trainingstat', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def trainingstat():
-    Athlete_ID = hash(g.oidc_token_info['sub'])
+    Athlete_ID = g.oidc_token_info['sub']
 
     Title = request.json['Title']
     Description = request.json['Description']
@@ -154,7 +154,7 @@ def get_trainingstat():
 @app.route('/selfeval', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def selfeval():
-    Athlete_ID = hash(g.oidc_token_info['sub'])
+    Athlete_ID = g.oidc_token_info['sub']
 
     Sleep = request.json['Sleep']
     General_tiredness = request.json['General_tiredness']
@@ -169,32 +169,31 @@ def selfeval():
     conn.commit()
     
     try: 
-    
-        c.execute("SELECT * FROM Identity WHERE Athlete_ID = ?", (Athlete_ID))
+        c.execute("SELECT * FROM Identity WHERE Athlete_ID = ?", (Athlete_ID,))
         Identityjson = c.fetchone()
         columns = [col[0] for col in c.description]
         IdentityDict = dict(zip(columns, Identityjson))
         Identityout = json.dumps(IdentityDict)
 
-        c.execute("SELECT * FROM Sport WHERE Athlete_ID = ?", (Athlete_ID))
+        '''c.execute("SELECT * FROM Sport WHERE Athlete_ID = ?", (Athlete_ID))
         Sportjson = c.fetchone()
         columns = [col[0] for col in c.description]
         SportDict = dict(zip(columns, Sportjson))
-        Sportout = json.dumps(SportDict)
+        Sportout = json.dumps(SportDict)'''
 
-        c.execute("SELECT * FROM Self_evaluation WHERE Athlete_ID = ? ORDER BY Date DESC LIMIT 1;", (Athlete_ID))
+        c.execute("SELECT * FROM Self_evaluation WHERE Athlete_ID = ? ORDER BY Date DESC LIMIT 1;", (Athlete_ID,))
         Self_evaluationjson = c.fetchone()
         columns = [col[0] for col in c.description]
         Self_evaluationDict = dict(zip(columns, Self_evaluationjson))
         Self_evaluationout = json.dumps(Self_evaluationDict)
 
-        c.execute("SELECT * FROM Injuries WHERE Athlete_ID = ?", (Athlete_ID))
+        c.execute("SELECT * FROM Injuries WHERE Athlete_ID = ?", (Athlete_ID,))
         Injuriesjson = c.fetchone()
         columns = [col[0] for col in c.description]
         InjuriesDict = dict(zip(columns, Injuriesjson))
         Injuriesout = json.dumps(InjuriesDict)
-
-        c.execute("SELECT * FROM Training_stat WHERE Athlete_ID = ?", (Athlete_ID))
+  
+        c.execute("SELECT * FROM Training_stat WHERE Athlete_ID = ?", (Athlete_ID,))
         Training_statjson = c.fetchone()
         columns = [col[0] for col in c.description]
         Training_statDict = dict(zip(columns, Training_statjson))
@@ -208,13 +207,13 @@ def selfeval():
     
     json_data = [{
     "Identity":Identityout,
-    "Sport":Sportout,
+    #"Sport":Sportout,
     "Self_evaluation":Self_evaluationout,
     "Injuries":Injuriesout,
     "Training_stat":Training_statout
     }]
-    
-    Thread(target=score,args=(Athlete_ID,json_data)).start()
+
+    Thread(target=score,args=(Athlete_ID,json_data,g.oidc_token_info['given_name'],g.oidc_token_info['family_name'])).start()
 
     return format_return(message='Les données de votre auto-évaluation ont bien été enregistrées, votre score vas etre mis à jour')
 
@@ -226,7 +225,7 @@ def get_selfeval():
 @app.route('/staff', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def staff():
-    Athlete_ID = hash(g.oidc_token_info['sub'])
+    Athlete_ID = g.oidc_token_info['sub']
 
     Name = request.json['Name']
     FamilyName = request.json['FamilyName']
@@ -269,7 +268,7 @@ def get_advice():
     return format_return(data=Advice)
 
 
-def score(Athlete_ID,json_data):
+def score(Athlete_ID,json_data,prenom,nom):
     response = requests.post(url=URL_IA, json=json_data, headers={'Content-type': 'application/json'})
 
     if response.status_code != 200 or response.json()['code'] < 0:
@@ -287,10 +286,7 @@ def score(Athlete_ID,json_data):
     last_score = c.fetchone()[0]
     c.execute("SELECT email FROM Staff WHERE Athlete_ID = ?", (Athlete_ID,))
     email = c.fetchone()[0]
-    c.execute("SELECT Prenom FROM Identity WHERE Athlete_ID = ?", (Athlete_ID,))
-    prenom = c.fetchone()[0]
-    c.execute("SELECT FamilyName FROM Identity WHERE Athlete_ID = ?", (Athlete_ID,))
-    nom = c.fetchone()[0]
+
 
     last_score_entier = int(last_score)
     conn.close()
@@ -355,4 +351,4 @@ if __name__ == '__main__':
         cur = connection.cursor()
         connection.commit()
         connection.close()
-    app.run('0.0.0.0',8443,ssl_context=('../certificate/cert.pem', '../certificate/key.pem'),debug=True)
+    app.run('0.0.0.0',8443,ssl_context=('../certificate/cert.pem', '../certificate/key.pem'))

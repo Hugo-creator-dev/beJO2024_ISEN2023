@@ -7,26 +7,26 @@
 -- two dots ('..' - without quotes).
 
 CREATE TABLE Identity (
-     Athlete_ID  int PRIMARY KEY,
+     Athlete_ID  TEXT PRIMARY KEY,
      Sport  string  NOT NULL ,
      Birth_Date  date  NOT NULL ,
      Sex string NOT NULL ,
      Taille int NOT NULL
 );
 
-CREATE TABLE  Sport  (
+/*CREATE TABLE  Sport  (
      Sport_ID  INTEGER PRIMARY KEY AUTOINCREMENT ,
-     Athlete_ID  int  NOT NULL ,
+     Athlete_ID  TEXT  NOT NULL ,
      Date_of_last_competition  date  NOT NULL ,
      Date_of_last_training  date  NOT NULL ,
      Muscle_used_in_the_last_workout  string  NOT NULL ,
      Recovery_status  string  NOT NULL ,
      frequence_training_week int
-);
+);*/
 
 CREATE TABLE  Self_evaluation  (
      Self_evaluation_ID  INTEGER PRIMARY KEY AUTOINCREMENT ,
-     Athlete_ID  int  NOT NULL ,
+     Athlete_ID  TEXT  NOT NULL ,
      Sleep  string  NOT NULL ,
      General_tiredness  string  NOT NULL ,
      Aches_pains  string  NOT NULL ,
@@ -37,7 +37,7 @@ CREATE TABLE  Self_evaluation  (
 
 CREATE TABLE  Injuries  (
      Injuries_ID  INTEGER PRIMARY KEY AUTOINCREMENT ,
-     Athlete_ID  int  NOT NULL ,
+     Athlete_ID  TEXT  NOT NULL ,
      Date  date  NOT NULL ,
      Position  string  NOT NULL ,
      Intensity  string  NOT NULL ,
@@ -51,13 +51,13 @@ CREATE TABLE  Staff  (
      Speciality  string  NOT NULL ,
      Phone_number  varchar  NOT NULL ,
      email string NOT NULL ,
-     athlete_id int
+     Athlete_ID TEXT
     
 );
 
 CREATE TABLE  Training_stat  (
      Training_stat_ID  INTEGER PRIMARY KEY AUTOINCREMENT ,
-     Athlete_ID  int  NOT NULL ,
+     Athlete_ID  TEXT  NOT NULL ,
      Title  string  NOT NULL ,
      Description  string  NOT NULL ,
      Date  date  NOT NULL ,
@@ -73,7 +73,7 @@ CREATE TABLE  Advice  (
 
 CREATE TABLE  Score  (
      Score_ID  INTEGER PRIMARY KEY AUTOINCREMENT ,
-     Athlete_ID int NOT NULL ,
+     Athlete_ID TEXT NOT NULL ,
      Score  int  NOT NULL ,
      Date date NOT NULL
 );
