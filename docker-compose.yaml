@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak
+    ports:
+      - "8443:8443"
+    environment:
+      - KEYCLOAK_ADMIN=user
+      - KEYCLOAK_ADMIN_PASSWORD=user
+    volumes:
+      - ./keycloak/h2:/opt/keycloak/data/h2:rw
+      - ./certificate:/opt/keycloak/certificate:ro
+      - ./keycloak/config/default.json:/opt/keycloak/data/import/default.json:ro
+    command:
+      - "start-dev"
+      - --https-certificate-key-file=/opt/keycloak/certificate/key.pem
+      - --https-certificate-file=/opt/keycloak/certificate/cert.pem
+      - --import-realm
+  
+  back:
+    image: flask:latest
+    ports:
+      - "8444:8443"
+    environment:
+      - MAIL_SERVER=none
+      - MAIL_PORT=0
+      - MAIL_PASSWORD=none
+      - MAIL_ADDRESS=none
+      - URL_IA=ia:8080
+      - SECRET_PASSWORD=8LdZH3rW4ADtSG5PMeXVgUw44Reww2vn
+    volumes:
+      - ./flask/storage:/app/storage:rw
+      - ./flask/run:/app/run:ro
+      - ./certificate:/app/certificate:ro
+      - ./flask/hack/__init__.py:/usr/local/lib/python3.8/site-packages/flask_oidc/__init__.py:ro
+
+  ia:
+    image: ia:latest
+    volumes:
+      - ./ia/run:/app/run:ro
+
+
